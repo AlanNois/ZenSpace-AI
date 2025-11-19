@@ -204,28 +204,32 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({ session, onClose }) =>
     };
 
     recognition.onerror = (event: any) => {
-      // Ignore common 'no-speech' errors or 'aborted' when we manually stop
+      // Silently ignore 'no-speech' as it's a normal part of the loop
       if (event.error === 'no-speech' || event.error === 'aborted') {
         return;
       }
 
-      console.error("Speech recognition error", event.error);
-      if (event.error === 'not-allowed') {
-        if (isEffectActive) setIsListening(false);
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+         console.error("Speech recognition permission denied.");
+         if (isEffectActive) setIsListening(false);
+         return;
       }
+      
+      console.warn("Speech recognition warning:", event.error);
     };
 
     recognition.onend = () => {
-      // Auto-restart only if this effect is still active and we want to listen
+      // Auto-restart if we are still listening and the component is mounted
       if (isEffectActive && isListening) {
-        try {
-           // Small delay to prevent aggressive loops
-           setTimeout(() => {
-              if (isEffectActive) recognition.start();
-           }, 100);
-        } catch (e) {
-          // Ignore errors if already started
-        }
+        setTimeout(() => {
+           if (isEffectActive && isListening) {
+              try {
+                recognition.start();
+              } catch (e) {
+                // Ignore start errors (e.g. already started)
+              }
+           }
+        }, 200);
       }
     };
 
