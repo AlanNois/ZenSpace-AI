@@ -1,0 +1,7 @@
+{
+  "name": "ZenSpace AI",
+  "description": "A personalized guided meditation generator powered by Gemini. Create custom audio-visual journeys and chat with an AI mindfulness coach.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
